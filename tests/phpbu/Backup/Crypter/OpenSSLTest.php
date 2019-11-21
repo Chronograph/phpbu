@@ -2,8 +2,10 @@
 namespace phpbu\App\Backup\Crypter;
 
 use phpbu\App\Backup\CliMockery;
+use phpbu\App\Backup\Restore\Plan;
 use phpbu\App\BaseMockery;
 use phpbu\App\Configuration;
+use PHPUnit\Framework\TestCase;
 
 /**
  * OpenSSLTest
@@ -16,7 +18,7 @@ use phpbu\App\Configuration;
  * @link       https://www.phpbu.de/
  * @since      Class available since Release 2.1.6
  */
-class OpenSSLTest extends \PHPUnit\Framework\TestCase
+class OpenSSLTest extends TestCase
 {
     use BaseMockery;
     use CliMockery;
@@ -121,6 +123,23 @@ class OpenSSLTest extends \PHPUnit\Framework\TestCase
         $openSSL = new OpenSSL($runner);
         $openSSL->setup(['pathToOpenSSL' => PHPBU_TEST_BIN, 'certFile' => '/foo/my.pem', 'algorithm' => 'aes256']);
         $openSSL->simulate($target, $appResult);
+    }
+
+    /**
+     * Tests OpenSSL::restore
+     */
+    public function testRestore()
+    {
+        $runner = $this->getRunnerMock();
+
+        $target = $this->createTargetMock(__FILE__);
+        $plan   = new Plan();
+
+        $openSSL = new OpenSSL($runner);
+        $openSSL->setup(['pathToOpenSSL' => PHPBU_TEST_BIN, 'certFile' => '/foo/my.pem', 'algorithm' => 'aes256']);
+        $openSSL->restore($target, $plan);
+
+        $this->assertCount(1, $plan->getDecryptionCommands());
     }
 
     /**

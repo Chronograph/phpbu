@@ -2,6 +2,7 @@
 namespace phpbu\App\Cli\Executable;
 
 use phpbu\App\Backup\Target\Compression;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Mysqldump Test
@@ -14,7 +15,7 @@ use phpbu\App\Backup\Target\Compression;
  * @link       http://www.phpbu.de/
  * @since      Class available since Release 2.1.0
  */
-class MysqldumpTest extends \PHPUnit\Framework\TestCase
+class MysqldumpTest extends TestCase
 {
     /**
      * Tests Mysqldump::getCommand
@@ -104,15 +105,15 @@ class MysqldumpTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Tests Mysqldump::useExtendedInsert
+     * Tests Mysqldump::skipExtendedInsert
      */
-    public function testUseExtendedInsert()
+    public function testSkipExtendedInsert()
     {
         $mysqldump = new Mysqldump(PHPBU_TEST_BIN);
-        $mysqldump->useExtendedInsert(true);
+        $mysqldump->skipExtendedInsert(true);
         $cmd       = $mysqldump->getCommand();
 
-        $this->assertEquals(PHPBU_TEST_BIN . '/mysqldump -e --all-databases', $cmd);
+        $this->assertEquals(PHPBU_TEST_BIN . '/mysqldump --skip-extended-insert --all-databases', $cmd);
     }
 
     /**
@@ -282,6 +283,20 @@ class MysqldumpTest extends \PHPUnit\Framework\TestCase
             . ' && '
             . PHPBU_TEST_BIN . '/mysqldump --all-databases --ignore-table=\'foo\' --ignore-table=\'bar\''
             . ' --skip-add-drop-table --no-create-db --no-create-info)',
+            $mysqldump->getCommand()
+        );
+    }
+
+    /**
+     * Tests Mysqldump::getCommand
+     */
+    public function testSkipTriggers()
+    {
+        $mysqldump = new Mysqldump(PHPBU_TEST_BIN);
+        $mysqldump->skipTriggers(true);
+
+        $this->assertEquals(
+            PHPBU_TEST_BIN . '/mysqldump --skip-triggers --all-databases',
             $mysqldump->getCommand()
         );
     }

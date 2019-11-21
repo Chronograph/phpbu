@@ -25,13 +25,19 @@ foreach ($lock->packages as $package) {
 foreach ($lock->{'packages-dev'} as $package) {
     if (!in_array($package->name, [
         "aws/aws-sdk-php",
+        "google/apiclient",
+        "guzzlehttp/guzzle",
         "kunalvarma05/dropbox-php-sdk",
+        "microsoft/azure-storage-blob",
+        "php-opencloud/openstack",
+        "phpmailer/phpmailer",
         "phpseclib/phpseclib",
+        "sebastian/environment",
+        "sebastianfeldmann/cli",
+        "sebastianfeldmann/ftp",
         "softlayer/objectstorage",
         "vlucas/phpdotenv",
-        "google/apiclient",
-        "php-opencloud/openstack",
-        "microsoft/azure-storage-blob"
+
     ])) {
       continue;
     }

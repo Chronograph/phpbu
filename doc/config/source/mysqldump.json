@@ -13,8 +13,9 @@
     "lockTables": true,
     "singleTransaction": true,
     "compress": true,
-    "extendedInsert": true,
+    "skipExtendedInsert": false,
     "hexBlob": true,
+    "skipTriggers": false,
     "routines": true,
     "gtidPurged": "AUTO",
     "pathToMysqldump": "/path/to/custom/bin"

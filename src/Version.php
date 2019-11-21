@@ -2,6 +2,9 @@
 namespace phpbu\App;
 
 use SebastianBergmann;
+use function array_slice;
+use function explode;
+use function implode;
 
 /**
  * Application Version.
@@ -94,8 +97,8 @@ final class Version
      */
     public static function minor() : string
     {
-        $version = \explode('-', self::id())[0];
-        return \implode('.', \array_slice(\explode('.', $version), 0, 2));
+        $version = explode('-', self::id())[0];
+        return implode('.', array_slice(explode('.', $version), 0, 2));
     }
 
     /**

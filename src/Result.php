@@ -1,7 +1,7 @@
 <?php
 namespace phpbu\App;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use phpbu\App\Event\Dispatcher;
 
 /**
  * Runner result.
@@ -20,28 +20,28 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class Result
 {
     /**
-     * Symfony EventDispatcher.
+     * EventDispatcher
      *
-     * @var \Symfony\Component\EventDispatcher\EventDispatcher
+     * @var \phpbu\App\Event\Dispatcher
      */
     protected $eventDispatcher;
 
     /**
-     * List of executed Backups.
+     * List of executed Backups
      *
      * @var array<\phpbu\App\Result\Backup>
      */
     protected $backups = [];
 
     /**
-     * Currently running backup.
+     * Currently running backup
      *
      * @var \phpbu\App\Result\Backup
      */
     protected $backupActive;
 
     /**
-     * List of errors.
+     * List of errors
      *
      * @var array
      */
@@ -100,7 +100,7 @@ class Result
     public function __construct()
     {
         $this->start           = microtime(true);
-        $this->eventDispatcher = new EventDispatcher();
+        $this->eventDispatcher = new Dispatcher();
     }
 
     /**

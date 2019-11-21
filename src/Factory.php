@@ -36,9 +36,10 @@ class Factory
             'env'    => '\\phpbu\\App\\Adapter\\Env',
         ],
         'logger'  => [
-            'json'    => '\\phpbu\\App\\Log\\Json',
-            'mail'    => '\\phpbu\\App\\Log\\Mail',
-            'webhook' => '\\phpbu\\App\\Log\\Webhook',
+            'json'     => '\\phpbu\\App\\Log\\Json',
+            'mail'     => '\\phpbu\\App\\Log\\Mail',
+            'webhook'  => '\\phpbu\\App\\Log\\Webhook',
+            'telegram' => '\\phpbu\\App\\Log\\Telegram',
         ],
         'source'  => [
             'arangodump'  => '\\phpbu\\App\\Backup\\Source\\Arangodump',
@@ -58,6 +59,7 @@ class Factory
             'sizediffavgpercent'      => '\\phpbu\\App\\Backup\\Check\\SizeDiffAvgPercent',
         ],
         'crypter'   => [
+            'gpg'     => '\\phpbu\\App\\Backup\\Crypter\\Gpg',
             'mcrypt'  => '\\phpbu\\App\\Backup\\Crypter\\Mcrypt',
             'openssl' => '\\phpbu\\App\\Backup\\Crypter\\OpenSSL',
         ],
