@@ -3,9 +3,11 @@ namespace phpbu\App\Backup\Source;
 
 use phpbu\App\Backup\CliMockery;
 use phpbu\App\BaseMockery;
+use phpbu\App\Configuration;
 use SebastianFeldmann\Cli\Command\Result as CommandResult;
 use SebastianFeldmann\Cli\Command\Runner\Simple;
 use SebastianFeldmann\Cli\Processor\ProcOpen;
+use PHPUnit\Framework\TestCase;
 
 /**
  * TarTest
@@ -18,7 +20,7 @@ use SebastianFeldmann\Cli\Processor\ProcOpen;
  * @link       https://www.phpbu.de/
  * @since      Class available since Release 1.1.5
  */
-class TarTest extends \PHPUnit\Framework\TestCase
+class TarTest extends TestCase
 {
     use BaseMockery;
     use CliMockery;
@@ -31,6 +33,18 @@ class TarTest extends \PHPUnit\Framework\TestCase
         $this->expectException('phpbu\App\Exception');
         $tar = new Tar();
         $tar->setup([]);
+
+        $this->assertFalse(true, 'exception should be thrown');
+    }
+
+    /**
+     * Tests Tar::setUp
+     */
+    public function testSetupPathDoesNotExist()
+    {
+        $this->expectException('phpbu\App\Exception');
+        $tar = new Tar();
+        $tar->setup(['path' => getcwd() . '/foo']);
 
         $this->assertFalse(true, 'exception should be thrown');
     }
@@ -95,6 +109,125 @@ class TarTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals(
             PHPBU_TEST_BIN . '/tar --exclude=\'./foo\' --exclude=\'./bar\' -cf \'/tmp/backup.tar\' -C \''
+            . dirname(__DIR__) . '\' \''
+            . basename(__DIR__) . '\'',
+            $exec->getCommand()
+        );
+    }
+
+    /**
+     * Tests Tar::getExecutable
+     *
+     * We have to create a configuration here to actually calculate a relative path from the configuration location.
+     */
+    public function testIncremental()
+    {
+        $incFile = getcwd() . '/foo.snar';
+        $conf    = new Configuration();
+        $conf->setFilename(getcwd() . '/config.xml');
+
+        $target  = $this->createTargetMock('/tmp/backup.tar');
+        $target->method('shouldBeCompressed')->willReturn(false);
+        $target->method('getPathname')->willReturn('/tmp/backup.tar');
+
+        $tar = new Tar();
+        $tar->setup(['pathToTar' => PHPBU_TEST_BIN, 'path' => __DIR__, 'incrementalFile' => 'foo.snar']);
+
+        $exec = $tar->getExecutable($target);
+
+        $this->assertEquals(
+            PHPBU_TEST_BIN . '/tar --listed-incremental=\'' . $incFile . '\' '
+            . '-cf \'/tmp/backup.tar\' -C \''
+            . dirname(__DIR__) . '\' \''
+            . basename(__DIR__) . '\'',
+            $exec->getCommand()
+        );
+    }
+
+    /**
+     * Tests Tar::setUp
+     */
+    public function testIncrementalInvalidZeroLevelFormat()
+    {
+        $this->expectException('phpbu\App\Exception');
+
+        $tar = new Tar();
+        $tar->setup(
+            [
+                'pathToTar'        => PHPBU_TEST_BIN,
+                'path'             => __DIR__,
+                'incrementalFile'  => 'foo.snar',
+                'forceLevelZeroOn' => 'foo'
+            ]
+        );
+
+        $this->assertFalse(true, 'exception should be thrown');
+    }
+
+    /**
+     * Tests Tar::getExecutable
+     */
+    public function testIncrementalForceZeroTrue()
+    {
+        $incFile = getcwd() . '/foo.snar';
+        $time    = time();
+        $conf    = new Configuration();
+        $conf->setFilename(getcwd() . '/config.xml');
+
+        $target  = $this->createTargetMock('/tmp/backup.tar');
+        $target->method('shouldBeCompressed')->willReturn(false);
+        $target->method('getPathname')->willReturn('/tmp/backup.tar');
+
+        $tar = new Tar(null, $time);
+        $tar->setup(
+            [
+                'pathToTar'        => PHPBU_TEST_BIN,
+                'path'             => __DIR__,
+                'incrementalFile'  => 'foo.snar',
+                'forceLevelZeroOn' => '%D@Mon|Tue|Wed|Thu|Fri|Sat|Sun'
+            ]
+        );
+
+        $exec = $tar->getExecutable($target);
+
+        $this->assertEquals(
+            PHPBU_TEST_BIN . '/tar --listed-incremental=\'' . $incFile . '\' --level=\'0\' '
+            . '-cf \'/tmp/backup.tar\' -C \''
+            . dirname(__DIR__) . '\' \''
+            . basename(__DIR__) . '\'',
+            $exec->getCommand()
+        );
+    }
+
+    /**
+     * Tests Tar::getExecutable
+     */
+    public function testIncrementalForceZeroFalse()
+    {
+        $incFile = getcwd() . '/foo.snar';
+        $time    = time() + (3600 * 48);
+        $conf    = new Configuration();
+        $conf->setFilename(getcwd() . '/config.xml');
+
+        $target  = $this->createTargetMock('/tmp/backup.tar');
+        $target->method('shouldBeCompressed')->willReturn(false);
+        $target->method('getPathname')->willReturn('/tmp/backup.tar');
+
+        $tar = new Tar(null, $time);
+        $tar->setup(
+            [
+                'pathToTar'        => PHPBU_TEST_BIN,
+                'path'             => __DIR__,
+                'incrementalFile'  => 'foo.snar',
+                'forceLevelZeroOn' => '%d@' . date('d')
+            ]
+        );
+
+        $exec = $tar->getExecutable($target);
+
+        $this->assertEquals(
+            PHPBU_TEST_BIN . '/tar --listed-incremental=\'' . $incFile . '\' '
+            . '-cf \'/tmp/backup.tar\' -C \''
             . dirname(__DIR__) . '\' \''
             . basename(__DIR__) . '\'',
             $exec->getCommand()

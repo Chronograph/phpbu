@@ -44,6 +44,13 @@ class Webhook implements Listener, Logger
     private $method;
 
     /**
+     * Request timeout (seconds)
+     *
+     * @var int
+     */
+    private $timeout;
+
+    /**
      * Basic auth username
      *
      * @var string
@@ -121,12 +128,23 @@ class Webhook implements Listener, Logger
         if (empty($options['uri'])) {
             throw new Exception('no uri given');
         }
+
+        // PHP >7.2 deprecated the filter options and enabled them by default
+        $filterOptions = version_compare(PHP_VERSION, '7.2.0', '<')
+                       ? FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED
+                       : null;
+
+        if (!filter_var($options['uri'], FILTER_VALIDATE_URL, $filterOptions)) {
+            throw new Exception('webhook URI is invalid');
+        }
+
         $this->uri             = $options['uri'];
         $this->method          = Arr::getValue($options, 'method', 'GET');
         $this->username        = Arr::getValue($options, 'username', '');
         $this->password        = Arr::getValue($options, 'password', '');
         $this->template        = Arr::getValue($options, 'template', '');
         $this->contentType     = Arr::getValue($options, 'contentType', 'multipart/form-data');
+        $this->timeout         = Arr::getValue($options, 'timeout', '');
     }
 
     /**
@@ -217,6 +235,10 @@ class Webhook implements Listener, Logger
         if (!empty($body)) {
             $headers[]                  = 'Content-Type: ' . $this->contentType;
             $options['http']['content'] = $body;
+        }
+
+        if (!empty($this->timeout)) {
+            $options['http']['timeout'] = $this->timeout;
         }
 
         if (!empty($this->username)) {

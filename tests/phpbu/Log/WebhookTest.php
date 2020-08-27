@@ -1,6 +1,8 @@
 <?php
 namespace phpbu\App\Log;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Webhook Test
  *
@@ -12,7 +14,7 @@ namespace phpbu\App\Log;
  * @link       http://www.phpbu.de/
  * @since      Class available since Release 5.0.0
  */
-class WebhookTest extends \PHPUnit\Framework\TestCase
+class WebhookTest extends TestCase
 {
     /**
      * Tests Webhook::getSubscribedEvents
@@ -20,7 +22,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
     public function testSubscribedEvents()
     {
         $events = Webhook::getSubscribedEvents();
-        $this->assertEquals(1, count($events));
+        $this->assertCount(1, $events);
     }
 
     /**
@@ -31,6 +33,16 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $this->expectException('phpbu\App\Exception');
         $json = new Webhook();
         $json->setup([]);
+    }
+
+    /**
+     * Tests Webhook::setup
+     */
+    public function testUriMustBeValid()
+    {
+        $this->expectException('phpbu\App\Exception');
+        $json = new Webhook();
+        $json->setup(['uri' => 'not a URI']);
     }
 
     /**
@@ -46,7 +58,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fail.uri';
+        $uri  = 'https://webhook.fail.uri/hook';
         $json = new Webhook();
         $json->setup(['uri' => $uri]);
 
@@ -66,7 +78,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fail.uri';
+        $uri  = 'https://webhook.fail.uri/hook';
         $json = new Webhook();
         $json->setup(['uri' => $uri, 'username' => 'foo', 'password' => 'bar']);
 
@@ -85,7 +97,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fake.uri';
+        $uri  = 'file://' . PHPBU_TEST_FILES . '/misc/webhook.fake.uri';
         $json = new Webhook();
         $json->setup(['uri' => $uri, 'contentType' => 'application/json', 'method' => 'post']);
 
@@ -106,7 +118,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fail.uri';
+        $uri  = 'https://webhook.fail.uri/hook';
         $json = new Webhook();
         $json->setup(['uri' => $uri, 'contentType' => 'application/json', 'method' => 'post']);
 
@@ -127,7 +139,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fail.uri';
+        $uri  = 'https://webhook.fail.uri/hook';
         $path = PHPBU_TEST_FILES . '/misc/webhook.tpl';
         $json = new Webhook();
         $json->setup(['uri' => $uri, 'contentType' => 'application/xml', 'method' => 'post', 'template' => $path]);
@@ -151,7 +163,7 @@ class WebhookTest extends \PHPUnit\Framework\TestCase
         $phpbuEndEvent = $this->createMock(\phpbu\App\Event\App\End::class);
         $phpbuEndEvent->method('getResult')->willReturn($result);
 
-        $uri  = PHPBU_TEST_FILES . '/misc/webhook.fail.uri';
+        $uri  = 'https://webhook.fail.uri/hook';
         $json = new Webhook();
         $json->setup(['uri' => $uri, 'contentType' => 'application/html', 'method' => 'post']);
 

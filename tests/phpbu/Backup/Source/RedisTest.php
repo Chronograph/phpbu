@@ -2,7 +2,9 @@
 namespace phpbu\App\Backup\Source;
 
 use phpbu\App\Backup\CliMockery;
+use phpbu\App\Backup\Restore\Plan;
 use phpbu\App\BaseMockery;
+use PHPUnit\Framework\TestCase;
 
 /**
  * RedisTest
@@ -15,7 +17,7 @@ use phpbu\App\BaseMockery;
  * @link       https://www.phpbu.de/
  * @since      Class available since Release 2.1.12
  */
-class RedisTest extends \PHPUnit\Framework\TestCase
+class RedisTest extends TestCase
 {
     use BaseMockery;
     use CliMockery;
@@ -69,7 +71,7 @@ class RedisTest extends \PHPUnit\Framework\TestCase
         $status = $redis->backup($target, $appResult);
 
         $this->assertEquals('/tmp/dump.rdb', $status->getDataPath());
-        $this->assertEquals(false, $status->handledCompression());
+        $this->assertFalse($status->handledCompression());
     }
 
     /**
@@ -164,5 +166,21 @@ class RedisTest extends \PHPUnit\Framework\TestCase
         $appResult->expects($this->once())->method('debug');
 
         $redis->backup($target, $appResult);
+    }
+
+    /**
+     * Tests Redis::restore
+     */
+    public function testRestore()
+    {
+        $plan    = new Plan();
+        $target  = $this->createTargetMock('/tmp/backup.redis');
+        $rdbPath = PHPBU_TEST_FILES . '/misc/dump.rdb';
+
+        $redis   = new Redis();
+        $redis->setup(['pathToRedisData' => $rdbPath, 'pathToRedisCli' => PHPBU_TEST_BIN]);
+        $redis->restore($target, $plan);
+
+        $this->assertCount(1, $plan->getRestoreCommands());
     }
 }

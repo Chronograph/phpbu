@@ -7,13 +7,14 @@
 .project
 .phpunit.result.cache
 .settings
+composer.lock
 /backup/*
 /build/coverage
 /build/logs
 /build/phar
 /build/phar-scoped
-/composer.lock
 /phpbu.xml
 /phpbu.json
 /vendor/
+/tools/
 cache.properties

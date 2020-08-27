@@ -153,6 +153,23 @@ class MysqldumpTest extends TestCase
     /**
      * Tests Mysqldump::getExecutable
      */
+    public function testSslCa()
+    {
+        $target    = $this->createTargetMock('/tmp/foo');
+        $mysqldump = new Mysqldump();
+        $mysqldump->setup(['pathToMysqldump' => PHPBU_TEST_BIN, 'sslCa' => '/var/www/html/BaltimoreCyberTrustRoot.crt.pem']);
+
+        $executable = $mysqldump->getExecutable($target);
+
+        $this->assertEquals(
+            PHPBU_TEST_BIN . '/mysqldump --ssl-ca=\'/var/www/html/BaltimoreCyberTrustRoot.crt.pem\' --all-databases > /tmp/foo',
+            $executable->getCommand()
+        );
+    }
+
+    /**
+     * Tests Mysqldump::getExecutable
+     */
     public function testHexBlob()
     {
         $target    = $this->createTargetMock();
@@ -307,7 +324,7 @@ class MysqldumpTest extends TestCase
         try {
             $mysqldump->backup($target, $appResult);
         } catch (Exception $e) {
-            $this->assertFalse(file_exists($file));
+            $this->assertFileNotExists($file);
             throw $e;
         }
     }

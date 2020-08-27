@@ -1,6 +1,8 @@
 <?php
 namespace phpbu\App\Cli\Executable\Rsync;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Rsync Location Test
  *
@@ -12,18 +14,8 @@ namespace phpbu\App\Cli\Executable\Rsync;
  * @link       http://www.phpbu.de/
  * @since      Class available since Release 3.1.4
  */
-class LocationTest extends \PHPUnit\Framework\TestCase
+class LocationTest extends TestCase
 {
-    /**
-     * Tests Rsync::toString
-     */
-    public function testEmptyOnInit()
-    {
-        $this->expectException('phpbu\App\Exception');
-        $location = new Location();
-        $location->toString();
-    }
-
     /**
      * Tests Rsync::toString
      */

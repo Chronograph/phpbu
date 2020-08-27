@@ -185,6 +185,14 @@ class Mysqldump extends SimulatorExecutable implements Simulator, Restorable
     private $gtidPurged;
 
     /**
+     * SSL CA
+     * --ssl-ca
+     *
+     * @var string
+     */
+    private $sslCa;
+
+    /**
      * Dump procedures and functions
      * --routines
      *
@@ -220,6 +228,7 @@ class Mysqldump extends SimulatorExecutable implements Simulator, Restorable
         $this->user               = Util\Arr::getValue($conf, 'user', '');
         $this->password           = Util\Arr::getValue($conf, 'password', '');
         $this->gtidPurged         = Util\Arr::getValue($conf, 'gtidPurged', '');
+        $this->sslCa              = Util\Arr::getValue($conf, 'sslCa', '');
         $this->hexBlob            = Util\Str::toBoolean(Util\Arr::getValue($conf, 'hexBlob', ''), false);
         $this->quick              = Util\Str::toBoolean(Util\Arr::getValue($conf, 'quick', ''), false);
         $this->lockTables         = Util\Str::toBoolean(Util\Arr::getValue($conf, 'lockTables', ''), false);
@@ -262,9 +271,28 @@ class Mysqldump extends SimulatorExecutable implements Simulator, Restorable
     public function backup(Target $target, Result $result) : Status
     {
         // create the writable dump directory for tables files
-        if ($this->filePerTable && !is_dir($this->getDumpTarget($target))) {
+        $dumpTarget = $this->getDumpTarget($target);
+        if ($this->filePerTable && !is_dir($dumpTarget)) {
+            $fileMode = 0777;
+
+            if (PHP_OS !== 'WINNT') {
+                // get the permissions of the first directory that exists
+                $pathSegments = explode(DIRECTORY_SEPARATOR, $dumpTarget);
+
+                do {
+                    $filename = implode(DIRECTORY_SEPARATOR, $pathSegments);
+
+                    if (is_dir($filename) === false) {
+                        continue;
+                    }
+
+                    $fileMode = substr(fileperms($filename), -4);
+                    break;
+                } while (array_pop($pathSegments) !== null);
+            }
+
             $old = umask(0);
-            mkdir($this->getDumpTarget($target), 0777, true);
+            mkdir($dumpTarget, $fileMode, true);
             umask($old);
         }
 
@@ -331,6 +359,7 @@ class Mysqldump extends SimulatorExecutable implements Simulator, Restorable
                    ->lockTables($this->lockTables)
                    ->dumpBlobsHexadecimal($this->hexBlob)
                    ->addGTIDStatement($this->gtidPurged)
+                   ->useSslCa($this->sslCa)
                    ->useCompression($this->compress)
                    ->skipExtendedInsert($this->skipExtendedInsert)
                    ->dumpTables($this->tables)

@@ -122,7 +122,7 @@ class Redis extends SimulatorExecutable implements Simulator, Restorable
     }
 
     /**
-     * Setup the Executable to run the 'tar' command.
+     * Setup the Executable to run the 'redis-cli' command.
      *
      * @param  \phpbu\App\Backup\Target $target
      * @return \phpbu\App\Cli\Executable
@@ -226,13 +226,8 @@ class Redis extends SimulatorExecutable implements Simulator, Restorable
      */
     public function restore(Target $target, Plan $plan): Status
     {
-        $plan->addRestoreCommand(
-            sprintf(
-                'cp %s %s',
-                $target->getPathnamePlain(),
-                $this->pathToRedisData
-            )
-        );
+        $cmd = sprintf('cp %s %s', $target->getPathnamePlain(), $this->pathToRedisData);
+        $plan->addRestoreCommand($cmd);
 
         return Status::create()->uncompressedFile($target->getPathnamePlain());
     }
